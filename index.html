@@ -68,11 +68,6 @@
         0 10px 30px rgba(0,0,0,0.6),
         0 0 0 1px rgba(255,255,255,0.03) inset;
       backdrop-filter: blur(12px);
-      transition: 0.2s ease;
-    }
-
-    .card:active {
-      transform: translateY(2px);
     }
 
     .label {
@@ -106,40 +101,57 @@
       box-shadow: 0 0 25px rgba(0,255,136,0.15);
     }
 
-    .button:active {
-      transform: scale(0.98);
-    }
-
     /* RANK TICKER */
     .scroll {
       margin-top: 18px;
       overflow: hidden;
       white-space: nowrap;
-      border-radius: 12px;
+      border-radius: 14px;
       border: 1px solid var(--border);
-      background: rgba(255,255,255,0.03);
+      background: rgba(255,255,255,0.02);
     }
 
     .track {
-      display: inline-block;
-      padding: 10px;
-      animation: scroll 14s linear infinite;
-    }
-
-    .badge {
-      display: inline-block;
-      margin-right: 22px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .badge b {
-      color: var(--text);
+      display: inline-flex;
+      gap: 14px;
+      padding: 12px;
+      animation: scroll 18s linear infinite;
     }
 
     @keyframes scroll {
       0% { transform: translateX(0); }
       100% { transform: translateX(-50%); }
+    }
+
+    /* ANIMATED RANK BOXES */
+    .rankBox {
+      min-width: 140px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
+
+      animation: float 3s ease-in-out infinite;
+      box-shadow: 0 0 15px rgba(0,255,136,0.05);
+    }
+
+    .rankName {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .rankElo {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
+      100% { transform: translateY(0px); }
     }
 
     .bottom {
@@ -159,6 +171,7 @@
       font-size: 11px;
       color: var(--muted);
     }
+
   </style>
 </head>
 
@@ -177,19 +190,60 @@
 
     <button class="button">FIND MATCH</button>
 
-    <!-- RANK + ELO TICKER -->
+    <!-- ANIMATED RANK SYSTEM -->
     <div class="scroll">
       <div class="track">
-        <span class="badge">📊 <b>Fed</b> — 120 ELO</span>
-        <span class="badge">📊 <b>Discord Mod</b> — 650 ELO</span>
-        <span class="badge">📊 <b>NPC</b> — 980 ELO</span>
-        <span class="badge">📊 <b>Redditor</b> — 1350 ELO</span>
-        <span class="badge">📊 <b>Gym Bro</b> — 1650 ELO</span>
-        <span class="badge">📊 <b>Looksmaxxer</b> — 1950 ELO</span>
-        <span class="badge">📊 <b>Mogger</b> — 2250 ELO</span>
-        <span class="badge">📊 <b>Gigachad</b> — 2600 ELO</span>
-        <span class="badge">📊 <b>Aura Farmer</b> — 3000 ELO</span>
-        <span class="badge">📊 <b>Final Boss</b> — 3500+ ELO</span>
+
+        <div class="rankBox">
+          <div class="rankName">Fed</div>
+          <div class="rankElo">0 - 499 ELO</div>
+        </div>
+
+        <div class="rankBox">
+          <div class="rankName">Discord Mod</div>
+          <div class="rankElo">500 - 899 ELO</div>
+        </div>
+
+        <div class="rankBox">
+          <div class="rankName">NPC</div>
+          <div class="rankElo">900 - 1199 ELO</div>
+        </div>
+
+        <div class="rankBox">
+          <div class="rankName">Redditor</div>
+          <div class="rankElo">1200 - 1499 ELO</div>
+        </div>
+
+        <div class="rankBox">
+          <div class="rankName">Gym Bro</div>
+          <div class="rankElo">1500 - 1799 ELO</div>
+        </div>
+
+        <div class="rankBox">
+          <div class="rankName">Looksmaxxer</div>
+          <div class="rankElo">1800 - 2099 ELO</div>
+        </div>
+
+        <div class="rankBox">
+          <div class="rankName">Mogger</div>
+          <div class="rankElo">2100 - 2399 ELO</div>
+        </div>
+
+        <div class="rankBox">
+          <div class="rankName">Gigachad</div>
+          <div class="rankElo">2400 - 2799 ELO</div>
+        </div>
+
+        <div class="rankBox">
+          <div class="rankName">Aura Farmer</div>
+          <div class="rankElo">2800 - 3299 ELO</div>
+        </div>
+
+        <div class="rankBox">
+          <div class="rankName">Final Boss</div>
+          <div class="rankElo">3300+ ELO</div>
+        </div>
+
       </div>
     </div>
 
