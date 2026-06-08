@@ -1,3 +1,4 @@
+alert("script loaded");
 // =========================
 // OMOOGLE ACCOUNT SYSTEM
 // =========================
