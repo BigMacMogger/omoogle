@@ -11,18 +11,18 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
       background: #0b0b0f;
       color: white;
+      text-align: center;
     }
 
     .container {
-      padding: 20px;
       max-width: 500px;
       margin: auto;
-      text-align: center;
+      padding: 20px;
     }
 
     .title {
       font-size: 28px;
-      font-weight: 800;
+      font-weight: 900;
       margin-top: 10px;
     }
 
@@ -57,10 +57,10 @@
       color: #9aa0a6;
     }
 
-    .matchBox {
+    .match {
       margin-top: 20px;
-      padding: 16px;
-      border-radius: 14px;
+      padding: 15px;
+      border-radius: 12px;
       background: rgba(255,255,255,0.03);
       display: none;
     }
@@ -83,45 +83,41 @@
 
   <div class="status" id="status"></div>
 
-  <div class="matchBox" id="matchBox">
+  <div class="match" id="matchBox">
     <div id="matchText"></div>
   </div>
 
 </div>
 
-<!-- ================= FIREBASE ================= -->
+<!-- ================= FIREBASE (COPY PASTE READY) ================= -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
 <script>
-/* 🔥 PASTE YOUR FIREBASE CONFIG HERE */
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
+/* 🔥 YOUR FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyDgJSJYCqQXzDhs7_VOWz13sobzoYNL7ao",
   authDomain: "omoogle-d0faa.firebaseapp.com",
   projectId: "omoogle-d0faa",
-  storageBucket: "omoogle-d0faa.firebasestorage.app",
+  storageBucket: "omoogle-d0faa.appspot.com",
   messagingSenderId: "291641969937",
   appId: "1:291641969937:web:b01f5c40857a3980da90b0"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-/* ================= iGAME DATA ================= */
+/* ================= GAME DATA ================= */
 
 let playerId = "p_" + Math.random().toString(36).substr(2, 9);
 let rating = 1000;
 
-/* ================= MATCHMAKING ================= */
+/* ================= FIND MATCH ================= */
 
 function findMatch() {
   document.getElementById("status").innerText = "Searching for opponent...";
+
+  document.getElementById("matchBox").style.display = "none";
 
   // join queue
   db.ref("queue/" + playerId).set({
@@ -144,7 +140,7 @@ function findMatch() {
   });
 }
 
-/* ================= MATCH START ================= */
+/* ================= START MATCH ================= */
 
 function startMatch(match) {
   document.getElementById("status").innerText = "Match found!";
