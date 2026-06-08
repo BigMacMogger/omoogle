@@ -2,6 +2,8 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="format-detection" content="telephone=no">
+
   <title>Omoogle</title>
 
   <style>
@@ -64,9 +66,6 @@
       border-radius: 18px;
       background: var(--card);
       border: 1px solid var(--border);
-      box-shadow:
-        0 10px 30px rgba(0,0,0,0.6),
-        0 0 0 1px rgba(255,255,255,0.03) inset;
       backdrop-filter: blur(12px);
     }
 
@@ -98,24 +97,21 @@
       font-size: 16px;
       font-weight: 800;
       color: #000;
-      box-shadow: 0 0 25px rgba(0,255,136,0.15);
     }
 
-    /* FIXED SCROLL SYSTEM */
+    /* ✅ PERFECT LOOP SYSTEM (NO GAP) */
     .scroll {
       margin-top: 18px;
       overflow: hidden;
       border-radius: 14px;
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.02);
-      position: relative;
     }
 
     .track {
       display: flex;
       width: max-content;
       animation: scroll 18s linear infinite;
-      will-change: transform;
     }
 
     @keyframes scroll {
@@ -125,8 +121,8 @@
 
     .rankBox {
       flex: 0 0 auto;
-      min-width: 160px;
-      margin: 10px 7px;
+      min-width: 170px;
+      margin: 10px 6px;
       padding: 10px;
       border-radius: 12px;
       background: rgba(255,255,255,0.04);
@@ -138,6 +134,10 @@
       font-size: 11px;
       color: var(--muted);
       margin-top: 4px;
+
+      /* prevents iOS “call number” detection */
+      pointer-events: none;
+      user-select: none;
     }
 
     .bottom {
@@ -162,58 +162,51 @@
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <div class="top">OMOOGLE</div>
-    <div class="sub">1v1 aura-based battles</div>
+  <div class="top">OMOOGLE</div>
+  <div class="sub">1v1 aura-based battles</div>
 
-    <div class="card">
-      <div class="label">YOUR RATING</div>
-      <div class="rating">57</div>
-      <div class="rank">Looksmaxxer</div>
-    </div>
-
-    <button class="button">FIND MATCH</button>
-
-    <!-- SMOOTH LOOP TICKER -->
-    <div class="scroll">
-      <div class="track">
-
-        <!-- SET 1 -->
-        <div class="rankBox">💀 Fed<div class="rankElo">0–499 ELO</div></div>
-        <div class="rankBox">🧑‍💻 Discord Mod<div class="rankElo">500–899 ELO</div></div>
-        <div class="rankBox">🤖 NPC<div class="rankElo">900–1199 ELO</div></div>
-        <div class="rankBox">🧾 Redditor<div class="rankElo">1200–1499 ELO</div></div>
-        <div class="rankBox">🏋️ Gym Bro<div class="rankElo">1500–1799 ELO</div></div>
-        <div class="rankBox">📈 Looksmaxxer<div class="rankElo">1800–2099 ELO</div></div>
-        <div class="rankBox">🧠 Mogger<div class="rankElo">2100–2399 ELO</div></div>
-        <div class="rankBox">⚡ Gigachad<div class="rankElo">2400–2799 ELO</div></div>
-        <div class="rankBox">🌪 Aura Farmer<div class="rankElo">2800–3299 ELO</div></div>
-        <div class="rankBox">👑 Final Boss<div class="rankElo">3300+ ELO</div></div>
-
-        <!-- SET 2 (smooth loop copy) -->
-        <div class="rankBox">💀 Fed<div class="rankElo">0–499 ELO</div></div>
-        <div class="rankBox">🧑‍💻 Discord Mod<div class="rankElo">500–899 ELO</div></div>
-        <div class="rankBox">🤖 NPC<div class="rankElo">900–1199 ELO</div></div>
-        <div class="rankBox">🧾 Redditor<div class="rankElo">1200–1499 ELO</div></div>
-        <div class="rankBox">🏋️ Gym Bro<div class="rankElo">1500–1799 ELO</div></div>
-        <div class="rankBox">📈 Looksmaxxer<div class="rankElo">1800–2099 ELO</div></div>
-        <div class="rankBox">🧠 Mogger<div class="rankElo">2100–2399 ELO</div></div>
-        <div class="rankBox">⚡ Gigachad<div class="rankElo">2400–2799 ELO</div></div>
-        <div class="rankBox">🌪 Aura Farmer<div class="rankElo">2800–3299 ELO</div></div>
-        <div class="rankBox">👑 Final Boss<div class="rankElo">3300+ ELO</div></div>
-
-      </div>
-    </div>
-
+  <div class="card">
+    <div class="label">YOUR RATING</div>
+    <div class="rating">57</div>
+    <div class="rank">Looksmaxxer</div>
   </div>
 
-  <div class="bottom">
-    <div class="tab">Leaderboard</div>
-    <div class="tab">Profile</div>
-    <div class="tab">History</div>
-    <div class="tab">Settings</div>
+  <button class="button">FIND MATCH</button>
+
+  <!-- SEAMLESS RANK LOOP -->
+  <div class="scroll">
+    <div class="track">
+
+      <!-- SET 1 -->
+      <div class="rankBox">💀 Fed<div class="rankElo">0 – 499 ELO</div></div>
+      <div class="rankBox">🧑‍💻 Discord Mod<div class="rankElo">500 – 899 ELO</div></div>
+      <div class="rankBox">🤖 NPC<div class="rankElo">900 – 1199 ELO</div></div>
+      <div class="rankBox">🧾 Redditor<div class="rankElo">1200 – 1499 ELO</div></div>
+      <div class="rankBox">🏋️ Gym Bro<div class="rankElo">1500 – 1799 ELO</div></div>
+      <div class="rankBox">📈 Looksmaxxer<div class="rankElo">1800 – 2099 ELO</div></div>
+      <div class="rankBox">🧠 Mogger<div class="rankElo">2100 – 2399 ELO</div></div>
+      <div class="rankBox">⚡ Gigachad<div class="rankElo">2400 – 2799 ELO</div></div>
+      <div class="rankBox">🌪 Aura Farmer<div class="rankElo">2800 – 3299 ELO</div></div>
+      <div class="rankBox">👑 Final Boss<div class="rankElo">3300+ ELO</div></div>
+
+      <!-- SET 2 (duplicate for perfect loop) -->
+      <div class="rankBox">💀 Fed<div class="rankElo">0 – 499 ELO</div></div>
+      <div class="rankBox">🧑‍💻 Discord Mod<div class="rankElo">500 – 899 ELO</div></div>
+      <div class="rankBox">🤖 NPC<div class="rankElo">900 – 1199 ELO</div></div>
+      <div class="rankBox">🧾 Redditor<div class="rankElo">1200 – 1499 ELO</div></div>
+      <div class="rankBox">🏋️ Gym Bro<div class="rankElo">1500 – 1799 ELO</div></div>
+      <div class="rankBox">📈 Looksmaxxer<div class="rankElo">1800 – 2099 ELO</div></div>
+      <div class="rankBox">🧠 Mogger<div class="rankElo">2100 – 2399 ELO</div></div>
+      <div class="rankBox">⚡ Gigachad<div class="rankElo">2400 – 2799 ELO</div></div>
+      <div class="rankBox">🌪 Aura Farmer<div class="rankElo">2800 – 3299 ELO</div></div>
+      <div class="rankBox">👑 Final Boss<div class="rankElo">3300+ ELO</div></div>
+
+    </div>
   </div>
+
+</div>
 
 </body>
 </html>
