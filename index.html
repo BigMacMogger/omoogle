@@ -20,8 +20,16 @@
     }
 
     .title {
-      font-size: 30px;
+      font-size: 32px;
       font-weight: 900;
+      margin-top: 10px;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 14px;
+      margin-top: 10px;
+      transform: scaleX(-1);
     }
 
     .card {
@@ -29,11 +37,6 @@
       padding: 15px;
       border-radius: 14px;
       background: rgba(255,255,255,0.05);
-    }
-
-    .rating {
-      font-size: 42px;
-      font-weight: 900;
     }
 
     button {
@@ -47,55 +50,10 @@
       color: black;
     }
 
-    .login {
-      background: #4285F4;
-      color: white;
-    }
-
-    video {
-      width: 100%;
-      border-radius: 12px;
-      margin-top: 10px;
-    }
-
-    #game {
-      display: none;
-    }
-
-    .small {
-      color: #aaa;
-      font-size: 13px;
-    }
-
-    #countdown {
-      font-size: 60px;
-      font-weight: 900;
-      margin-top: 10px;
-    }
-
-    .rankBar {
+    #matchStatus {
       margin-top: 15px;
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.05);
-      overflow: hidden;
-      white-space: nowrap;
-    }
-
-    .rankTrack {
-      display: inline-block;
-      animation: scroll 12s linear infinite;
-    }
-
-    .rank {
-      display: inline-block;
-      margin-right: 20px;
-      opacity: 0.8;
-    }
-
-    @keyframes scroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+      font-size: 18px;
+      color: #aaa;
     }
   </style>
 </head>
@@ -106,57 +64,20 @@
 
   <div class="title">OMOOGLE</div>
 
-  <!-- LOGIN -->
-  <div id="loginBox">
-    <button class="login" onclick="login()">SIGN IN WITH GOOGLE</button>
+  <div class="card">
+    👥 Online Players: <span id="online">0</span>
   </div>
 
-  <!-- FACE CHECK -->
-  <div id="faceCheck" style="display:none;">
-    <div class="small">Face Check</div>
-    <video id="video" autoplay playsinline></video>
-    <button onclick="enterGame()">ENTER GAME</button>
-  </div>
+  <video id="video" autoplay playsinline></video>
 
-  <!-- GAME -->
-  <div id="game">
+  <button onclick="joinQueue()">FIND MATCH</button>
 
-    <div class="small" id="userInfo"></div>
-
-    <div class="card">
-      <div>Your ELO</div>
-      <div class="rating" id="elo">1000</div>
-      <div id="stats">Wins: 0 | Losses: 0</div>
-    </div>
-
-    <!-- ANIMATED RANK BAR -->
-    <div class="rankBar">
-      <div class="rankTrack">
-        <span class="rank">🧼 Fed</span>
-        <span class="rank">😐 Mod</span>
-        <span class="rank">🧍 NPC</span>
-        <span class="rank">🏋️ Gym Bro</span>
-        <span class="rank">📈 Looksmaxxer</span>
-        <span class="rank">😎 Mogger</span>
-        <span class="rank">🔥 Gigachad</span>
-        <span class="rank">⚡ Aura Farmer</span>
-
-        <span class="rank">🧼 Fed</span>
-        <span class="rank">😐 Mod</span>
-      </div>
-    </div>
-
-    <button onclick="findMatch()">FIND MATCH</button>
-
-    <div id="countdown"></div>
-
-  </div>
+  <div id="matchStatus">Not in queue</div>
 
 </div>
 
-<!-- FIREBASE -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
 <script>
@@ -170,43 +91,16 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
 const db = firebase.database();
 
-let user = null;
-let elo = 1000;
-let wins = 0;
-let losses = 0;
-let stream = null;
-
-/* ================= GOOGLE LOGIN FIX ================= */
-function login() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider);
-}
-
-/* handle redirect result */
-auth.getRedirectResult().then(result => {
-  if (result.user) {
-    user = result.user;
-
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("faceCheck").style.display = "block";
-
-    document.getElementById("userInfo").innerText =
-      "Logged in as: " + user.displayName;
-
-    loadData();
-    startCamera();
-  }
-});
+/* ================= USER ID ================= */
+let userId = "u_" + Math.random().toString(36).substring(2, 10);
 
 /* ================= CAMERA ================= */
 async function startCamera() {
   let video = document.getElementById("video");
 
-  stream = await navigator.mediaDevices.getUserMedia({
+  let stream = await navigator.mediaDevices.getUserMedia({
     video: true,
     audio: false
   });
@@ -214,62 +108,68 @@ async function startCamera() {
   video.srcObject = stream;
 }
 
-function enterGame() {
-  document.getElementById("faceCheck").style.display = "none";
-  document.getElementById("game").style.display = "block";
-}
+startCamera();
 
-/* ================= DATA ================= */
-function loadData() {
-  db.ref("users/" + user.uid).on("value", snap => {
-    let d = snap.val();
+/* ================= ONLINE SYSTEM ================= */
+db.ref("online/" + userId).set({
+  time: Date.now()
+});
 
-    if (d) {
-      elo = d.elo || 1000;
-      wins = d.wins || 0;
-      losses = d.losses || 0;
-    }
+db.ref("online/" + userId).onDisconnect().remove();
 
-    updateUI();
+/* live counter */
+db.ref("online").on("value", snap => {
+  let data = snap.val();
+  let count = data ? Object.keys(data).length : 0;
+  document.getElementById("online").innerText = count;
+});
+
+/* ================= MATCHMAKING ================= */
+function joinQueue() {
+
+  document.getElementById("matchStatus").innerText = "Searching for match...";
+
+  db.ref("queue/" + userId).set({
+    time: Date.now()
   });
+
+  db.ref("queue/" + userId).onDisconnect().remove();
+
+  checkMatch();
 }
 
-function saveData() {
-  db.ref("users/" + user.uid).set({
-    elo,
-    wins,
-    losses,
-    name: user.displayName
-  });
-}
+/* simple matcher loop */
+function checkMatch() {
 
-/* ================= UI ================= */
-function updateUI() {
-  document.getElementById("elo").innerText = elo;
-  document.getElementById("stats").innerText =
-    "Wins: " + wins + " | Losses: " + losses;
-}
+  setInterval(() => {
 
-/* ================= MATCH ================= */
-function findMatch() {
+    db.ref("queue").once("value", snap => {
+      let q = snap.val();
+      if (!q) return;
 
-  let win = Math.random() > 0.5;
+      let players = Object.keys(q);
 
-  if (win) {
-    elo += 25;
-    wins++;
-  } else {
-    elo -= 15;
-    losses++;
-  }
+      if (players.length >= 2) {
 
-  if (elo < 100) elo = 100;
+        let p1 = players[0];
+        let p2 = players[1];
 
-  saveData();
-  updateUI();
+        let matchId = "m_" + Date.now();
 
-  document.getElementById("countdown").innerText =
-    win ? "YOU WON" : "YOU LOST";
+        db.ref("matches/" + matchId).set({
+          p1, p2,
+          state: "started"
+        });
+
+        db.ref("queue/" + p1).remove();
+        db.ref("queue/" + p2).remove();
+
+        document.getElementById("matchStatus").innerText =
+          "MATCH FOUND: " + matchId;
+      }
+    });
+
+  }, 2000);
 }
 </script>
 
