@@ -1,177 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Omoogle</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #0b0b0f;
-      color: white;
-      text-align: center;
-    }
+  <link rel="stylesheet" href="style.css">
 
-    .container {
-      max-width: 500px;
-      margin: auto;
-      padding: 20px;
-    }
-
-    .title {
-      font-size: 32px;
-      font-weight: 900;
-      margin-top: 10px;
-    }
-
-    video {
-      width: 100%;
-      border-radius: 14px;
-      margin-top: 10px;
-      transform: scaleX(-1);
-    }
-
-    .card {
-      margin-top: 15px;
-      padding: 15px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.05);
-    }
-
-    button {
-      width: 100%;
-      padding: 15px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 12px;
-      font-weight: 800;
-      background: #00ff88;
-      color: black;
-    }
-
-    #matchStatus {
-      margin-top: 15px;
-      font-size: 18px;
-      color: #aaa;
-    }
-  </style>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
-
 <body>
 
-<div class="container">
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="screen">
 
-  <div class="title">OMOOGLE</div>
+    <h1 class="logo">OMOOGLE</h1>
 
-  <div class="card">
-    👥 Online Players: <span id="online">0</span>
+    <p class="subtitle">
+      Rate. Mog. Climb.
+    </p>
+
+    <button id="googleLoginBtn" class="mainButton">
+      Sign in with Google
+    </button>
+
   </div>
 
-  <video id="video" autoplay playsinline></video>
+  <!-- USERNAME SCREEN -->
+  <div id="usernameScreen" class="screen hidden">
 
-  <button onclick="joinQueue()">FIND MATCH</button>
+    <h1 class="logo">WELCOME TO OMOOGLE</h1>
 
-  <div id="matchStatus">Not in queue</div>
+    <p class="subtitle">
+      Choose Your Identity
+    </p>
 
-</div>
+    <input
+      id="usernameInput"
+      type="text"
+      maxlength="13"
+      placeholder="Username"
+    >
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <p id="usernameStatus"></p>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDgJSJYCqQXzDhs7_VOWz13sobzoYNL7ao",
-  authDomain: "omoogle-d0faa.firebaseapp.com",
-  projectId: "omoogle-d0faa",
-  storageBucket: "omoogle-d0faa.appspot.com",
-  messagingSenderId: "291641969937",
-  appId: "1:291641969937:web:b01f5c40857a3980da90b0"
-};
+    <button id="createUsernameBtn" class="mainButton">
+      Continue
+    </button>
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+  </div>
 
-/* ================= USER ID ================= */
-let userId = "u_" + Math.random().toString(36).substring(2, 10);
+  <!-- MAIN MENU -->
+  <div id="mainMenu" class="screen hidden">
 
-/* ================= CAMERA ================= */
-async function startCamera() {
-  let video = document.getElementById("video");
+    <h1 class="logo">OMOOGLE</h1>
 
-  let stream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: false
-  });
+    <div class="card">
+      <div id="profileUsername">Loading...</div>
+      <div id="profileRank">Fed</div>
+      <div id="profileElo">1000 ELO</div>
+    </div>
 
-  video.srcObject = stream;
-}
+    <div class="card">
+      👥 Online:
+      <span id="onlineCount">0</span>
+    </div>
 
-startCamera();
+    <button id="findMatchBtn" class="mainButton">
+      FIND MATCH
+    </button>
 
-/* ================= ONLINE SYSTEM ================= */
-db.ref("online/" + userId).set({
-  time: Date.now()
-});
+    <button id="profileBtn" class="secondaryButton">
+      PROFILE
+    </button>
 
-db.ref("online/" + userId).onDisconnect().remove();
+  </div>
 
-/* live counter */
-db.ref("online").on("value", snap => {
-  let data = snap.val();
-  let count = data ? Object.keys(data).length : 0;
-  document.getElementById("online").innerText = count;
-});
-
-/* ================= MATCHMAKING ================= */
-function joinQueue() {
-
-  document.getElementById("matchStatus").innerText = "Searching for match...";
-
-  db.ref("queue/" + userId).set({
-    time: Date.now()
-  });
-
-  db.ref("queue/" + userId).onDisconnect().remove();
-
-  checkMatch();
-}
-
-/* simple matcher loop */
-function checkMatch() {
-
-  setInterval(() => {
-
-    db.ref("queue").once("value", snap => {
-      let q = snap.val();
-      if (!q) return;
-
-      let players = Object.keys(q);
-
-      if (players.length >= 2) {
-
-        let p1 = players[0];
-        let p2 = players[1];
-
-        let matchId = "m_" + Date.now();
-
-        db.ref("matches/" + matchId).set({
-          p1, p2,
-          state: "started"
-        });
-
-        db.ref("queue/" + p1).remove();
-        db.ref("queue/" + p2).remove();
-
-        document.getElementById("matchStatus").innerText =
-          "MATCH FOUND: " + matchId;
-      }
-    });
-
-  }, 2000);
-}
-</script>
+  <!-- LOAD SCRIPTS -->
+  <script src="firebase.js"></script>
+  <script src="script.js"></script>
 
 </body>
 </html>
