@@ -1,5 +1,3 @@
-// Firebase Configuration
-
 const firebaseConfig = {
   apiKey: "AIzaSyDgJSJYCqQXzDhs7_VOWz13sobzoYNL7ao",
   authDomain: "omoogle-d0faa.firebaseapp.com",
@@ -10,9 +8,7 @@ const firebaseConfig = {
   databaseURL: "https://omoogle-d0faa-default-rtdb.firebaseio.com"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Services
 const auth = firebase.auth();
 const db = firebase.database();
