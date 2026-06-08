@@ -25,11 +25,25 @@ const onlineCount = document.getElementById("onlineCount");
 // GOOGLE LOGIN
 // =========================
 
-googleLoginBtn.addEventListener("click", () => {
+googleLoginBtn.addEventListener("click", async () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-
-  auth.signInWithRedirect(provider);
+  await auth.signInWithRedirect(provider);
 });
+
+// =========================
+// HANDLE REDIRECT
+// =========================
+
+auth.getRedirectResult()
+  .then((result) => {
+    if (result.user) {
+      console.log("Google login successful");
+    }
+  })
+  .catch((error) => {
+    console.error("Login Error:", error);
+    alert("Login failed: " + error.message);
+  });
 
 // =========================
 // AUTH STATE
@@ -43,14 +57,16 @@ auth.onAuthStateChanged(async (user) => {
 
   currentUser = user;
 
-  const userRef = db.ref("users/" + user.uid);
+  console.log("Logged in:", user.email);
 
+  const userRef = db.ref("users/" + user.uid);
   const snapshot = await userRef.once("value");
 
   // Existing account
   if (snapshot.exists()) {
 
     loadProfile(snapshot.val());
+
     showMainMenu();
 
     setupOnlinePresence();
@@ -86,25 +102,24 @@ createUsernameBtn.addEventListener("click", async () => {
 
   let username = usernameInput.value.trim();
 
-  // Validation
   const valid =
     /^[A-Za-z0-9_]{3,13}$/.test(username);
 
   if (!valid) {
 
     usernameStatus.innerText =
-      "Username must be 3–13 letters, numbers, or _";
+      "Username must be 3-13 letters, numbers, or _";
 
     return;
   }
 
-  usernameStatus.innerText = "Checking...";
+  usernameStatus.innerText = "Checking username...";
 
-  const nameRef =
+  const usernameRef =
     db.ref("usernames/" + username);
 
   const existing =
-    await nameRef.once("value");
+    await usernameRef.once("value");
 
   if (existing.exists()) {
 
@@ -114,36 +129,21 @@ createUsernameBtn.addEventListener("click", async () => {
     return;
   }
 
-  // Save username
-  await db.ref("users/" + currentUser.uid).set({
-
+  const profile = {
     username: username,
-
     elo: 1000,
-
     wins: 0,
-
     losses: 0,
-
     rank: "Fed",
-
     createdAt: Date.now(),
-
     lastUsernameChange: Date.now()
+  };
 
-  });
+  await db.ref("users/" + currentUser.uid)
+    .set(profile);
 
   await db.ref("usernames/" + username)
     .set(currentUser.uid);
-
-  usernameStatus.innerText =
-    "Account created!";
-
-  const profile = {
-    username,
-    elo: 1000,
-    rank: "Fed"
-  };
 
   loadProfile(profile);
 
@@ -154,7 +154,7 @@ createUsernameBtn.addEventListener("click", async () => {
 });
 
 // =========================
-// PROFILE
+// PROFILE DISPLAY
 // =========================
 
 function loadProfile(data) {
@@ -171,16 +171,20 @@ function loadProfile(data) {
 }
 
 // =========================
-// ONLINE COUNTER
+// ONLINE SYSTEM
 // =========================
 
 function setupOnlinePresence() {
 
+  if (!currentUser) return;
+
   const uid = currentUser.uid;
 
-  db.ref("online/" + uid).set({
-    lastSeen: Date.now()
-  });
+  db.ref("online/" + uid)
+    .set({
+      online: true,
+      timestamp: Date.now()
+    });
 
   db.ref("online/" + uid)
     .onDisconnect()
@@ -188,16 +192,13 @@ function setupOnlinePresence() {
 
 }
 
-// Live online count
 db.ref("online").on("value", (snapshot) => {
 
   const data = snapshot.val();
 
   if (!data) {
-
     onlineCount.innerText = "0";
     return;
-
   }
 
   onlineCount.innerText =
@@ -206,7 +207,7 @@ db.ref("online").on("value", (snapshot) => {
 });
 
 // =========================
-// PROFILE BUTTON
+// BUTTONS
 // =========================
 
 document
@@ -214,21 +215,17 @@ document
   .addEventListener("click", () => {
 
     alert(
-      "Profile system coming next."
+      "Username changes and profile page coming soon."
     );
 
 });
-
-// =========================
-// FIND MATCH BUTTON
-// =========================
 
 document
   .getElementById("findMatchBtn")
   .addEventListener("click", () => {
 
     alert(
-      "Matchmaking system coming next."
+      "Matchmaking coming next."
     );
 
 });
