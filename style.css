@@ -1,1 +1,134 @@
-yoo
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #0b0b0f;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+.screen {
+  max-width: 500px;
+  margin: auto;
+  padding: 24px;
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+.logo {
+  font-size: 42px;
+  font-weight: 900;
+  margin-top: 40px;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  color: #9a9a9a;
+  margin-bottom: 30px;
+}
+
+.card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 15px;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 8px 30px rgba(0,0,0,.25);
+}
+
+#profileUsername {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+#profileRank {
+  margin-top: 8px;
+  color: #bbbbbb;
+}
+
+#profileElo {
+  margin-top: 8px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: white;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+input:focus {
+  outline: none;
+  border-color: #ffffff55;
+}
+
+#usernameStatus {
+  min-height: 24px;
+  margin-bottom: 12px;
+  color: #cccccc;
+}
+
+.mainButton {
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+
+  background: white;
+  color: black;
+
+  transition: transform .15s ease;
+}
+
+.mainButton:active {
+  transform: scale(.98);
+}
+
+.secondaryButton {
+  width: 100%;
+  margin-top: 10px;
+
+  border: none;
+  border-radius: 14px;
+  padding: 15px;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  background: rgba(255,255,255,0.08);
+  color: white;
+
+  cursor: pointer;
+}
+
+#onlineCount {
+  font-weight: 800;
+}
+
+@media (max-width: 600px) {
+  .logo {
+    font-size: 36px;
+  }
+}
