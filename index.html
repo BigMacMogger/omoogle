@@ -3,7 +3,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="format-detection" content="telephone=no">
-  <title>Omoogle Multiplayer</title>
+  <title>Omoogle</title>
 
   <style>
     body {
@@ -24,10 +24,11 @@
       font-size: 28px;
       font-weight: 900;
       margin-top: 10px;
+      letter-spacing: 2px;
     }
 
     .card {
-      margin-top: 20px;
+      margin-top: 18px;
       padding: 18px;
       border-radius: 16px;
       background: rgba(255,255,255,0.05);
@@ -55,6 +56,13 @@
     .status {
       margin-top: 15px;
       color: #9aa0a6;
+      min-height: 20px;
+    }
+
+    #countdown {
+      font-size: 60px;
+      font-weight: 900;
+      margin-top: 10px;
     }
 
     .match {
@@ -64,6 +72,12 @@
       background: rgba(255,255,255,0.03);
       display: none;
     }
+
+    .players {
+      margin-top: 10px;
+      color: #9aa0a6;
+      font-size: 14px;
+    }
   </style>
 </head>
 
@@ -72,6 +86,8 @@
 <div class="container">
 
   <div class="title">OMOOGLE</div>
+
+  <div class="players" id="players">Active Players: 0</div>
 
   <div class="card">
     <div>Your Rating</div>
@@ -83,18 +99,20 @@
 
   <div class="status" id="status"></div>
 
+  <div id="countdown"></div>
+
   <div class="match" id="matchBox">
     <div id="matchText"></div>
   </div>
 
 </div>
 
-<!-- ================= FIREBASE (COPY PASTE READY) ================= -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
 <script>
-/* 🔥 YOUR FIREBASE CONFIG */
+/* ================= FIREBASE CONFIG ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyDgJSJYCqQXzDhs7_VOWz13sobzoYNL7ao",
   authDomain: "omoogle-d0faa.firebaseapp.com",
@@ -107,16 +125,23 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* ================= GAME DATA ================= */
-
+/* ================= PLAYER DATA ================= */
 let playerId = "p_" + Math.random().toString(36).substr(2, 9);
 let rating = 1000;
+let countdownRunning = false;
+
+/* ================= ACTIVE PLAYER COUNT ================= */
+db.ref("queue").on("value", snap => {
+  let data = snap.val();
+  let count = data ? Object.keys(data).length : 0;
+  document.getElementById("players").innerText = "Active Players: " + count;
+});
 
 /* ================= FIND MATCH ================= */
-
 function findMatch() {
-  document.getElementById("status").innerText = "Searching for opponent...";
 
+  document.getElementById("status").innerText = "Searching for opponent...";
+  document.getElementById("countdown").innerText = "";
   document.getElementById("matchBox").style.display = "none";
 
   // join queue
@@ -124,6 +149,8 @@ function findMatch() {
     rating: rating,
     time: Date.now()
   });
+
+  db.ref("queue/" + playerId).onDisconnect().remove();
 
   // listen for match
   db.ref("matches").on("value", snap => {
@@ -134,18 +161,44 @@ function findMatch() {
       let match = data[id];
 
       if (match.p1 === playerId || match.p2 === playerId) {
-        startMatch(match);
+        startCountdown(match);
       }
     }
   });
 }
 
-/* ================= START MATCH ================= */
+/* ================= COUNTDOWN ================= */
+function startCountdown(match) {
+  if (countdownRunning) return;
+  countdownRunning = true;
 
-function startMatch(match) {
   document.getElementById("status").innerText = "Match found!";
 
-  document.getElementById("matchBox").style.display = "block";
+  let c = 3;
+  document.getElementById("countdown").innerText = c;
+
+  let timer = setInterval(() => {
+
+    c--;
+
+    if (c > 0) {
+      document.getElementById("countdown").innerText = c;
+    }
+
+    if (c === 0) {
+      document.getElementById("countdown").innerText = "FIGHT!";
+    }
+
+    if (c < 0) {
+      clearInterval(timer);
+      startMatch(match);
+    }
+
+  }, 1000);
+}
+
+/* ================= MATCH ================= */
+function startMatch(match) {
 
   let youAura = Math.floor(Math.random() * 100);
   let oppAura = Math.floor(Math.random() * 100);
@@ -159,10 +212,18 @@ function startMatch(match) {
 
   document.getElementById("rating").innerText = rating;
 
+  document.getElementById("matchBox").style.display = "block";
+
   document.getElementById("matchText").innerHTML =
     "You Aura: " + youAura +
     "<br>Opponent Aura: " + oppAura +
     "<br><br>" + (win ? "YOU WON" : "YOU LOST");
+
+  document.getElementById("status").innerText = "";
+
+  document.getElementById("countdown").innerText = "";
+
+  countdownRunning = false;
 }
 </script>
 
