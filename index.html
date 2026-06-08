@@ -7,7 +7,7 @@
   <style>
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+      font-family: Arial;
       background: #0b0b0f;
       color: white;
       text-align: center;
@@ -26,7 +26,7 @@
 
     .card {
       margin-top: 20px;
-      padding: 18px;
+      padding: 15px;
       border-radius: 16px;
       background: rgba(255,255,255,0.05);
     }
@@ -36,16 +36,22 @@
       font-weight: 900;
     }
 
-    .button {
+    button {
       margin-top: 15px;
       width: 100%;
       padding: 16px;
-      font-size: 16px;
       font-weight: 800;
       border: none;
       border-radius: 14px;
       background: #00ff88;
       color: black;
+    }
+
+    video {
+      width: 100%;
+      margin-top: 15px;
+      border-radius: 14px;
+      display: none;
     }
 
     #countdown {
@@ -56,19 +62,15 @@
 
     .match {
       margin-top: 20px;
-      display: none;
       padding: 15px;
-      background: rgba(255,255,255,0.03);
       border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      display: none;
     }
 
     .players {
-      color: #9aa0a6;
+      color: #aaa;
       margin-top: 10px;
-    }
-
-    input {
-      margin-top: 15px;
     }
   </style>
 </head>
@@ -86,9 +88,10 @@
     <div class="rating" id="rating">1000</div>
   </div>
 
-  <button class="button" onclick="findMatch()">FIND MATCH</button>
+  <button onclick="startCamera()">START CAMERA</button>
+  <video id="video" autoplay playsinline></video>
 
-  <input type="file" accept="image/*" capture="user" id="camera">
+  <button onclick="findMatch()">FIND MATCH</button>
 
   <div id="countdown"></div>
 
@@ -98,6 +101,7 @@
 
 </div>
 
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
@@ -116,10 +120,9 @@ const db = firebase.database();
 
 let playerId = "p_" + Math.random().toString(36).substr(2, 9);
 let rating = 1000;
-let imageData = null;
-let matched = false;
+let streamActive = false;
 
-/* ONLINE */
+/* ACTIVE PLAYERS */
 db.ref("online/" + playerId).set({time:Date.now()});
 db.ref("online/" + playerId).onDisconnect().remove();
 
@@ -129,20 +132,29 @@ db.ref("online").on("value", snap => {
     "Active Players: " + (d ? Object.keys(d).length : 0);
 });
 
-/* CAMERA */
-document.getElementById("camera").addEventListener("change", e => {
-  let file = e.target.files[0];
-  if (!file) return;
+/* 📹 LIVE CAMERA */
+async function startCamera() {
+  let video = document.getElementById("video");
 
-  let reader = new FileReader();
-  reader.onload = ev => {
-    imageData = ev.target.result;
-  };
-  reader.readAsDataURL(file);
-});
+  try {
+    let stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false
+    });
 
-/* FIND MATCH */
+    video.srcObject = stream;
+    video.style.display = "block";
+
+    streamActive = true;
+
+  } catch (e) {
+    alert("Camera permission denied");
+  }
+}
+
+/* MATCHMAKING (simple working version) */
 function findMatch() {
+
   db.ref("queue/" + playerId).set({
     rating: rating,
     time: Date.now()
@@ -153,7 +165,6 @@ function findMatch() {
   matchmaker();
 }
 
-/* AUTO MATCHMAKER (THIS WAS MISSING) */
 function matchmaker() {
   db.ref("queue").once("value", snap => {
     let q = snap.val();
@@ -168,19 +179,17 @@ function matchmaker() {
 
     let matchId = "m_" + Date.now();
 
-    db.ref("matches/" + matchId).set({
-      p1, p2
-    });
+    db.ref("matches/" + matchId).set({p1, p2});
 
     db.ref("queue/" + p1).remove();
     db.ref("queue/" + p2).remove();
   });
 
-  listenForMatch();
+  listen();
 }
 
 /* LISTEN */
-function listenForMatch() {
+function listen() {
   db.ref("matches").on("value", snap => {
     let data = snap.val();
     if (!data) return;
@@ -188,8 +197,7 @@ function listenForMatch() {
     for (let id in data) {
       let m = data[id];
 
-      if ((m.p1 === playerId || m.p2 === playerId) && !matched) {
-        matched = true;
+      if (m.p1 === playerId || m.p2 === playerId) {
         countdown(m);
       }
     }
@@ -202,26 +210,24 @@ function countdown(match) {
 
   let t = setInterval(() => {
     document.getElementById("countdown").innerText = c;
-
     c--;
 
     if (c < 0) {
       clearInterval(t);
-      start(match);
+      startMatch(match);
     }
   }, 1000);
 }
 
 /* MATCH */
-function start(match) {
+function startMatch(match) {
 
-  let youAura = imageData ? Math.floor(Math.random()*40+60) : Math.floor(Math.random()*100);
+  let youAura = streamActive ? Math.floor(Math.random()*40+60) : Math.floor(Math.random()*100);
   let oppAura = Math.floor(Math.random()*100);
 
   let win = youAura >= oppAura;
 
-  if (win) rating += 25;
-  else rating -= 15;
+  rating += win ? 25 : -15;
 
   document.getElementById("rating").innerText = rating;
 
@@ -231,8 +237,6 @@ function start(match) {
     "You Aura: " + youAura +
     "<br>Opponent Aura: " + oppAura +
     "<br><br>" + (win ? "YOU WON" : "YOU LOST");
-
-  matched = false;
 }
 </script>
 
