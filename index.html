@@ -3,7 +3,6 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="format-detection" content="telephone=no">
-
   <title>Omoogle</title>
 
   <style>
@@ -24,23 +23,10 @@
       overflow-x: hidden;
     }
 
-    body::before {
-      content: "";
-      position: fixed;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(0,255,136,0.15), transparent 60%);
-      top: -150px;
-      left: -150px;
-      filter: blur(40px);
-      z-index: 0;
-    }
-
     .container {
       position: relative;
       z-index: 2;
       padding: 22px;
-      padding-bottom: 90px;
       max-width: 500px;
       margin: auto;
     }
@@ -50,7 +36,6 @@
       font-size: 28px;
       font-weight: 800;
       letter-spacing: 3px;
-      margin-top: 10px;
     }
 
     .sub {
@@ -67,23 +52,18 @@
       background: var(--card);
       border: 1px solid var(--border);
       backdrop-filter: blur(12px);
-    }
-
-    .label {
-      color: var(--muted);
-      font-size: 12px;
-      letter-spacing: 1px;
+      text-align: center;
     }
 
     .rating {
-      font-size: 38px;
+      font-size: 40px;
       font-weight: 900;
-      margin-top: 6px;
+      margin-top: 10px;
     }
 
     .rank {
-      margin-top: 6px;
       color: var(--accent);
+      margin-top: 5px;
       font-weight: 600;
     }
 
@@ -99,64 +79,24 @@
       color: #000;
     }
 
-    /* ✅ PERFECT LOOP SYSTEM (NO GAP) */
-    .scroll {
+    .status {
+      margin-top: 15px;
+      font-size: 14px;
+      color: var(--muted);
+      min-height: 20px;
+    }
+
+    .resultBox {
       margin-top: 18px;
-      overflow: hidden;
+      padding: 16px;
       border-radius: 14px;
+      background: rgba(255,255,255,0.03);
       border: 1px solid var(--border);
-      background: rgba(255,255,255,0.02);
+      display: none;
     }
 
-    .track {
-      display: flex;
-      width: max-content;
-      animation: scroll 18s linear infinite;
-    }
-
-    @keyframes scroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
-    .rankBox {
-      flex: 0 0 auto;
-      min-width: 170px;
-      margin: 10px 6px;
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.06);
-      text-align: center;
-    }
-
-    .rankElo {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
-
-      /* prevents iOS “call number” detection */
-      pointer-events: none;
-      user-select: none;
-    }
-
-    .bottom {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(15,15,20,0.6);
-      backdrop-filter: blur(12px);
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-      border-top: 1px solid var(--border);
-    }
-
-    .tab {
-      font-size: 11px;
-      color: var(--muted);
-    }
+    .win { color: #00ff88; font-weight: 800; }
+    .lose { color: #ff4d4d; font-weight: 800; }
   </style>
 </head>
 
@@ -165,48 +105,76 @@
 <div class="container">
 
   <div class="top">OMOOGLE</div>
-  <div class="sub">1v1 aura-based battles</div>
+  <div class="sub">1v1 aura battles</div>
 
   <div class="card">
-    <div class="label">YOUR RATING</div>
-    <div class="rating">57</div>
-    <div class="rank">Looksmaxxer</div>
+    <div>Your Rating</div>
+    <div class="rating" id="rating">57</div>
+    <div class="rank" id="rank">Looksmaxxer</div>
   </div>
 
-  <button class="button">FIND MATCH</button>
+  <button class="button" onclick="findMatch()">FIND MATCH</button>
 
-  <!-- SEAMLESS RANK LOOP -->
-  <div class="scroll">
-    <div class="track">
+  <div class="status" id="status"></div>
 
-      <!-- SET 1 -->
-      <div class="rankBox">💀 Fed<div class="rankElo">0 – 499 ELO</div></div>
-      <div class="rankBox">🧑‍💻 Discord Mod<div class="rankElo">500 – 899 ELO</div></div>
-      <div class="rankBox">🤖 NPC<div class="rankElo">900 – 1199 ELO</div></div>
-      <div class="rankBox">🧾 Redditor<div class="rankElo">1200 – 1499 ELO</div></div>
-      <div class="rankBox">🏋️ Gym Bro<div class="rankElo">1500 – 1799 ELO</div></div>
-      <div class="rankBox">📈 Looksmaxxer<div class="rankElo">1800 – 2099 ELO</div></div>
-      <div class="rankBox">🧠 Mogger<div class="rankElo">2100 – 2399 ELO</div></div>
-      <div class="rankBox">⚡ Gigachad<div class="rankElo">2400 – 2799 ELO</div></div>
-      <div class="rankBox">🌪 Aura Farmer<div class="rankElo">2800 – 3299 ELO</div></div>
-      <div class="rankBox">👑 Final Boss<div class="rankElo">3300+ ELO</div></div>
-
-      <!-- SET 2 (duplicate for perfect loop) -->
-      <div class="rankBox">💀 Fed<div class="rankElo">0 – 499 ELO</div></div>
-      <div class="rankBox">🧑‍💻 Discord Mod<div class="rankElo">500 – 899 ELO</div></div>
-      <div class="rankBox">🤖 NPC<div class="rankElo">900 – 1199 ELO</div></div>
-      <div class="rankBox">🧾 Redditor<div class="rankElo">1200 – 1499 ELO</div></div>
-      <div class="rankBox">🏋️ Gym Bro<div class="rankElo">1500 – 1799 ELO</div></div>
-      <div class="rankBox">📈 Looksmaxxer<div class="rankElo">1800 – 2099 ELO</div></div>
-      <div class="rankBox">🧠 Mogger<div class="rankElo">2100 – 2399 ELO</div></div>
-      <div class="rankBox">⚡ Gigachad<div class="rankElo">2400 – 2799 ELO</div></div>
-      <div class="rankBox">🌪 Aura Farmer<div class="rankElo">2800 – 3299 ELO</div></div>
-      <div class="rankBox">👑 Final Boss<div class="rankElo">3300+ ELO</div></div>
-
-    </div>
+  <div class="resultBox" id="resultBox">
+    <div id="resultText"></div>
   </div>
 
 </div>
+
+<script>
+let rating = 57;
+
+function getRank(r) {
+  if (r >= 91) return "Final Boss";
+  if (r >= 81) return "Aura Farmer";
+  if (r >= 71) return "Gigachad";
+  if (r >= 61) return "Mogger";
+  if (r >= 51) return "Looksmaxxer";
+  if (r >= 41) return "Gym Bro";
+  if (r >= 31) return "Redditor";
+  if (r >= 21) return "NPC";
+  if (r >= 11) return "Discord Mod";
+  return "Fed";
+}
+
+function findMatch() {
+  document.getElementById("status").innerText = "Searching for opponent...";
+
+  document.getElementById("resultBox").style.display = "none";
+
+  setTimeout(() => {
+
+    // opponent + aura generation (1–100)
+    let youAura = Math.floor(Math.random() * 100) + 1;
+    let oppAura = Math.floor(Math.random() * 100) + 1;
+
+    let win = youAura >= oppAura;
+
+    let change = win ? Math.floor(Math.random() * 25) + 10 : -(Math.floor(Math.random() * 20) + 5);
+    rating += change;
+
+    if (rating < 1) rating = 1;
+    if (rating > 100) rating = 100;
+
+    document.getElementById("rating").innerText = rating;
+    document.getElementById("rank").innerText = getRank(rating);
+
+    document.getElementById("status").innerText = "";
+
+    document.getElementById("resultBox").style.display = "block";
+
+    document.getElementById("resultText").innerHTML =
+      (win ? "<span class='win'>YOU WON</span>" : "<span class='lose'>YOU LOST</span>") +
+      "<br><br>You Aura: " + youAura +
+      "<br>Opponent Aura: " + oppAura +
+      "<br><br>Change: " + change +
+      "<br>New Rating: " + rating;
+
+  }, 2000 + Math.random() * 2000);
+}
+</script>
 
 </body>
 </html>
