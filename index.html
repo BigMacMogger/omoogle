@@ -2,7 +2,6 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="format-detection" content="telephone=no">
   <title>Omoogle</title>
 
   <style>
@@ -23,7 +22,6 @@
     .title {
       font-size: 30px;
       font-weight: 900;
-      letter-spacing: 2px;
     }
 
     .card {
@@ -31,17 +29,15 @@
       padding: 18px;
       border-radius: 16px;
       background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
     }
 
     .rating {
-      font-size: 42px;
+      font-size: 40px;
       font-weight: 900;
-      margin-top: 10px;
     }
 
     .button {
-      margin-top: 18px;
+      margin-top: 15px;
       width: 100%;
       padding: 16px;
       font-size: 16px;
@@ -58,29 +54,21 @@
       margin-top: 10px;
     }
 
-    .status {
-      margin-top: 12px;
-      color: #9aa0a6;
-      min-height: 20px;
-    }
-
     .match {
       margin-top: 20px;
-      padding: 15px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.03);
       display: none;
+      padding: 15px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
     }
 
     .players {
-      margin-top: 10px;
       color: #9aa0a6;
-      font-size: 14px;
+      margin-top: 10px;
     }
 
-    input[type="file"] {
+    input {
       margin-top: 15px;
-      color: white;
     }
   </style>
 </head>
@@ -102,8 +90,6 @@
 
   <input type="file" accept="image/*" capture="user" id="camera">
 
-  <div class="status" id="status"></div>
-
   <div id="countdown"></div>
 
   <div class="match" id="matchBox">
@@ -112,7 +98,6 @@
 
 </div>
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
@@ -132,15 +117,16 @@ const db = firebase.database();
 let playerId = "p_" + Math.random().toString(36).substr(2, 9);
 let rating = 1000;
 let imageData = null;
+let matched = false;
 
-/* ONLINE SYSTEM */
-db.ref("online/" + playerId).set({ time: Date.now() });
+/* ONLINE */
+db.ref("online/" + playerId).set({time:Date.now()});
 db.ref("online/" + playerId).onDisconnect().remove();
 
 db.ref("online").on("value", snap => {
-  let data = snap.val();
-  let count = data ? Object.keys(data).length : 0;
-  document.getElementById("players").innerText = "Active Players: " + count;
+  let d = snap.val();
+  document.getElementById("players").innerText =
+    "Active Players: " + (d ? Object.keys(d).length : 0);
 });
 
 /* CAMERA */
@@ -149,25 +135,14 @@ document.getElementById("camera").addEventListener("change", e => {
   if (!file) return;
 
   let reader = new FileReader();
-  reader.onload = function(event) {
-    imageData = event.target.result;
-
-    db.ref("online/" + playerId).update({
-      image: imageData
-    });
-
-    document.getElementById("status").innerText = "Camera loaded!";
+  reader.onload = ev => {
+    imageData = ev.target.result;
   };
   reader.readAsDataURL(file);
 });
 
-/* MATCHMAKING */
+/* FIND MATCH */
 function findMatch() {
-
-  document.getElementById("status").innerText = "Searching...";
-  document.getElementById("matchBox").style.display = "none";
-  document.getElementById("countdown").innerText = "";
-
   db.ref("queue/" + playerId).set({
     rating: rating,
     time: Date.now()
@@ -175,6 +150,37 @@ function findMatch() {
 
   db.ref("queue/" + playerId).onDisconnect().remove();
 
+  matchmaker();
+}
+
+/* AUTO MATCHMAKER (THIS WAS MISSING) */
+function matchmaker() {
+  db.ref("queue").once("value", snap => {
+    let q = snap.val();
+    if (!q) return;
+
+    let players = Object.keys(q);
+
+    if (players.length < 2) return;
+
+    let p1 = players[0];
+    let p2 = players[1];
+
+    let matchId = "m_" + Date.now();
+
+    db.ref("matches/" + matchId).set({
+      p1, p2
+    });
+
+    db.ref("queue/" + p1).remove();
+    db.ref("queue/" + p2).remove();
+  });
+
+  listenForMatch();
+}
+
+/* LISTEN */
+function listenForMatch() {
   db.ref("matches").on("value", snap => {
     let data = snap.val();
     if (!data) return;
@@ -182,7 +188,8 @@ function findMatch() {
     for (let id in data) {
       let m = data[id];
 
-      if (m.p1 === playerId || m.p2 === playerId) {
+      if ((m.p1 === playerId || m.p2 === playerId) && !matched) {
+        matched = true;
         countdown(m);
       }
     }
@@ -190,39 +197,31 @@ function findMatch() {
 }
 
 /* COUNTDOWN */
-let running = false;
-
 function countdown(match) {
-  if (running) return;
-  running = true;
-
   let c = 3;
-  document.getElementById("status").innerText = "Match found!";
 
   let t = setInterval(() => {
-
     document.getElementById("countdown").innerText = c;
 
     c--;
 
     if (c < 0) {
       clearInterval(t);
-      startMatch(match);
+      start(match);
     }
-
   }, 1000);
 }
 
 /* MATCH */
-function startMatch(match) {
+function start(match) {
 
-  let youAura = imageData ? Math.floor(Math.random()*40 + 60) : Math.floor(Math.random()*100);
+  let youAura = imageData ? Math.floor(Math.random()*40+60) : Math.floor(Math.random()*100);
   let oppAura = Math.floor(Math.random()*100);
 
   let win = youAura >= oppAura;
 
-  rating += win ? 25 : -15;
-  if (rating < 100) rating = 100;
+  if (win) rating += 25;
+  else rating -= 15;
 
   document.getElementById("rating").innerText = rating;
 
@@ -233,10 +232,7 @@ function startMatch(match) {
     "<br>Opponent Aura: " + oppAura +
     "<br><br>" + (win ? "YOU WON" : "YOU LOST");
 
-  document.getElementById("countdown").innerText = "";
-  document.getElementById("status").innerText = "";
-
-  running = false;
+  matched = false;
 }
 </script>
 
