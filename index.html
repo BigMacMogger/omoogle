@@ -101,7 +101,6 @@
       box-shadow: 0 0 25px rgba(0,255,136,0.15);
     }
 
-    /* RANK TICKER */
     .scroll {
       margin-top: 18px;
       overflow: hidden;
@@ -112,10 +111,11 @@
     }
 
     .track {
-      display: inline-flex;
+      display: flex;
       gap: 14px;
       padding: 12px;
       animation: scroll 18s linear infinite;
+      width: max-content;
     }
 
     @keyframes scroll {
@@ -123,35 +123,19 @@
       100% { transform: translateX(-50%); }
     }
 
-    /* ANIMATED RANK BOXES */
     .rankBox {
-      min-width: 140px;
+      min-width: 150px;
       padding: 10px;
       border-radius: 12px;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.06);
       text-align: center;
-
-      animation: float 3s ease-in-out infinite;
-      box-shadow: 0 0 15px rgba(0,255,136,0.05);
-    }
-
-    .rankName {
-      font-size: 12px;
-      font-weight: 700;
-      color: #fff;
     }
 
     .rankElo {
       font-size: 11px;
       color: var(--muted);
       margin-top: 4px;
-    }
-
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-3px); }
-      100% { transform: translateY(0px); }
     }
 
     .bottom {
@@ -171,7 +155,6 @@
       font-size: 11px;
       color: var(--muted);
     }
-
   </style>
 </head>
 
@@ -190,62 +173,36 @@
 
     <button class="button">FIND MATCH</button>
 
-    <!-- ANIMATED RANK SYSTEM -->
-<div class="scroll">
-  <div class="track">
+    <!-- RANK TICKER (FIXED LOOP) -->
+    <div class="scroll">
+      <div class="track">
 
-    <div class="rankBox">
-      <div class="rankName">💀 Fed</div>
-      <div class="rankElo">0 - 499 ELO</div>
+        <!-- LOOP 1 -->
+        <div class="rankBox">💀 Fed <div class="rankElo">0 - 499 ELO</div></div>
+        <div class="rankBox">🧑‍💻 Discord Mod <div class="rankElo">500 - 899 ELO</div></div>
+        <div class="rankBox">🤖 NPC <div class="rankElo">900 - 1199 ELO</div></div>
+        <div class="rankBox">🧾 Redditor <div class="rankElo">1200 - 1499 ELO</div></div>
+        <div class="rankBox">🏋️ Gym Bro <div class="rankElo">1500 - 1799 ELO</div></div>
+        <div class="rankBox">📈 Looksmaxxer <div class="rankElo">1800 - 2099 ELO</div></div>
+        <div class="rankBox">🧠 Mogger <div class="rankElo">2100 - 2399 ELO</div></div>
+        <div class="rankBox">⚡ Gigachad <div class="rankElo">2400 - 2799 ELO</div></div>
+        <div class="rankBox">🌪 Aura Farmer <div class="rankElo">2800 - 3299 ELO</div></div>
+        <div class="rankBox">👑 Final Boss <div class="rankElo">3300+ ELO</div></div>
+
+        <!-- LOOP 2 (duplicate for smooth scroll) -->
+        <div class="rankBox">💀 Fed <div class="rankElo">0 - 499 ELO</div></div>
+        <div class="rankBox">🧑‍💻 Discord Mod <div class="rankElo">500 - 899 ELO</div></div>
+        <div class="rankBox">🤖 NPC <div class="rankElo">900 - 1199 ELO</div></div>
+        <div class="rankBox">🧾 Redditor <div class="rankElo">1200 - 1499 ELO</div></div>
+        <div class="rankBox">🏋️ Gym Bro <div class="rankElo">1500 - 1799 ELO</div></div>
+        <div class="rankBox">📈 Looksmaxxer <div class="rankElo">1800 - 2099 ELO</div></div>
+        <div class="rankBox">🧠 Mogger <div class="rankElo">2100 - 2399 ELO</div></div>
+        <div class="rankBox">⚡ Gigachad <div class="rankElo">2400 - 2799 ELO</div></div>
+        <div class="rankBox">🌪 Aura Farmer <div class="rankElo">2800 - 3299 ELO</div></div>
+        <div class="rankBox">👑 Final Boss <div class="rankElo">3300+ ELO</div></div>
+
+      </div>
     </div>
-
-    <div class="rankBox">
-      <div class="rankName">🧑‍💻 Discord Mod</div>
-      <div class="rankElo">500 - 899 ELO</div>
-    </div>
-
-    <div class="rankBox">
-      <div class="rankName">🤖 NPC</div>
-      <div class="rankElo">900 - 1199 ELO</div>
-    </div>
-
-    <div class="rankBox">
-      <div class="rankName">🧾 Redditor</div>
-      <div class="rankElo">1200 - 1499 ELO</div>
-    </div>
-
-    <div class="rankBox">
-      <div class="rankName">🏋️ Gym Bro</div>
-      <div class="rankElo">1500 - 1799 ELO</div>
-    </div>
-
-    <div class="rankBox">
-      <div class="rankName">📈 Looksmaxxer</div>
-      <div class="rankElo">1800 - 2099 ELO</div>
-    </div>
-
-    <div class="rankBox">
-      <div class="rankName">🧠 Mogger</div>
-      <div class="rankElo">2100 - 2399 ELO</div>
-    </div>
-
-    <div class="rankBox">
-      <div class="rankName">⚡ Gigachad</div>
-      <div class="rankElo">2400 - 2799 ELO</div>
-    </div>
-
-    <div class="rankBox">
-      <div class="rankName">🌪 Aura Farmer</div>
-      <div class="rankElo">2800 - 3299 ELO</div>
-    </div>
-
-    <div class="rankBox">
-      <div class="rankName">👑 Final Boss</div>
-      <div class="rankElo">3300+ ELO</div>
-    </div>
-
-  </div>
-</div>
 
   </div>
 
