@@ -3,56 +3,35 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="format-detection" content="telephone=no">
-  <title>Omoogle</title>
+  <title>Omoogle Multiplayer</title>
 
   <style>
-    :root {
-      --bg: #0b0b0f;
-      --card: rgba(25, 25, 35, 0.75);
-      --border: rgba(255,255,255,0.08);
-      --text: #fff;
-      --muted: #9aa0a6;
-      --accent: #00ff88;
-    }
-
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
-      background: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
+      background: #0b0b0f;
+      color: white;
     }
 
     .container {
-      position: relative;
-      z-index: 2;
-      padding: 22px;
+      padding: 20px;
       max-width: 500px;
       margin: auto;
+      text-align: center;
     }
 
-    .top {
-      text-align: center;
+    .title {
       font-size: 28px;
       font-weight: 800;
-      letter-spacing: 3px;
-    }
-
-    .sub {
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 6px;
+      margin-top: 10px;
     }
 
     .card {
-      margin-top: 18px;
+      margin-top: 20px;
       padding: 18px;
-      border-radius: 18px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(12px);
-      text-align: center;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
     }
 
     .rating {
@@ -61,42 +40,30 @@
       margin-top: 10px;
     }
 
-    .rank {
-      color: var(--accent);
-      margin-top: 5px;
-      font-weight: 600;
-    }
-
     .button {
-      margin-top: 22px;
+      margin-top: 20px;
       width: 100%;
       padding: 16px;
-      background: var(--accent);
-      border: none;
-      border-radius: 14px;
       font-size: 16px;
       font-weight: 800;
-      color: #000;
+      border: none;
+      border-radius: 14px;
+      background: #00ff88;
+      color: black;
     }
 
     .status {
       margin-top: 15px;
-      font-size: 14px;
-      color: var(--muted);
-      min-height: 20px;
+      color: #9aa0a6;
     }
 
-    .resultBox {
-      margin-top: 18px;
+    .matchBox {
+      margin-top: 20px;
       padding: 16px;
       border-radius: 14px;
       background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
       display: none;
     }
-
-    .win { color: #00ff88; font-weight: 800; }
-    .lose { color: #ff4d4d; font-weight: 800; }
   </style>
 </head>
 
@@ -104,75 +71,102 @@
 
 <div class="container">
 
-  <div class="top">OMOOGLE</div>
-  <div class="sub">1v1 aura battles</div>
+  <div class="title">OMOOGLE</div>
 
   <div class="card">
     <div>Your Rating</div>
-    <div class="rating" id="rating">57</div>
-    <div class="rank" id="rank">Looksmaxxer</div>
+    <div class="rating" id="rating">1000</div>
+    <div id="rank">Fed</div>
   </div>
 
   <button class="button" onclick="findMatch()">FIND MATCH</button>
 
   <div class="status" id="status"></div>
 
-  <div class="resultBox" id="resultBox">
-    <div id="resultText"></div>
+  <div class="matchBox" id="matchBox">
+    <div id="matchText"></div>
   </div>
 
 </div>
 
-<script>
-let rating = 57;
+<!-- ================= FIREBASE ================= -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
-function getRank(r) {
-  if (r >= 91) return "Final Boss";
-  if (r >= 81) return "Aura Farmer";
-  if (r >= 71) return "Gigachad";
-  if (r >= 61) return "Mogger";
-  if (r >= 51) return "Looksmaxxer";
-  if (r >= 41) return "Gym Bro";
-  if (r >= 31) return "Redditor";
-  if (r >= 21) return "NPC";
-  if (r >= 11) return "Discord Mod";
-  return "Fed";
-}
+<script>
+/* 🔥 PASTE YOUR FIREBASE CONFIG HERE */
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDgJSJYCqQXzDhs7_VOWz13sobzoYNL7ao",
+  authDomain: "omoogle-d0faa.firebaseapp.com",
+  projectId: "omoogle-d0faa",
+  storageBucket: "omoogle-d0faa.firebasestorage.app",
+  messagingSenderId: "291641969937",
+  appId: "1:291641969937:web:b01f5c40857a3980da90b0"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+/* ================= GAME DATA ================= */
+
+let playerId = "p_" + Math.random().toString(36).substr(2, 9);
+let rating = 1000;
+
+/* ================= MATCHMAKING ================= */
 
 function findMatch() {
   document.getElementById("status").innerText = "Searching for opponent...";
 
-  document.getElementById("resultBox").style.display = "none";
+  // join queue
+  db.ref("queue/" + playerId).set({
+    rating: rating,
+    time: Date.now()
+  });
 
-  setTimeout(() => {
+  // listen for match
+  db.ref("matches").on("value", snap => {
+    let data = snap.val();
+    if (!data) return;
 
-    // opponent + aura generation (1–100)
-    let youAura = Math.floor(Math.random() * 100) + 1;
-    let oppAura = Math.floor(Math.random() * 100) + 1;
+    for (let id in data) {
+      let match = data[id];
 
-    let win = youAura >= oppAura;
+      if (match.p1 === playerId || match.p2 === playerId) {
+        startMatch(match);
+      }
+    }
+  });
+}
 
-    let change = win ? Math.floor(Math.random() * 25) + 10 : -(Math.floor(Math.random() * 20) + 5);
-    rating += change;
+/* ================= MATCH START ================= */
 
-    if (rating < 1) rating = 1;
-    if (rating > 100) rating = 100;
+function startMatch(match) {
+  document.getElementById("status").innerText = "Match found!";
 
-    document.getElementById("rating").innerText = rating;
-    document.getElementById("rank").innerText = getRank(rating);
+  document.getElementById("matchBox").style.display = "block";
 
-    document.getElementById("status").innerText = "";
+  let youAura = Math.floor(Math.random() * 100);
+  let oppAura = Math.floor(Math.random() * 100);
 
-    document.getElementById("resultBox").style.display = "block";
+  let win = youAura >= oppAura;
 
-    document.getElementById("resultText").innerHTML =
-      (win ? "<span class='win'>YOU WON</span>" : "<span class='lose'>YOU LOST</span>") +
-      "<br><br>You Aura: " + youAura +
-      "<br>Opponent Aura: " + oppAura +
-      "<br><br>Change: " + change +
-      "<br>New Rating: " + rating;
+  if (win) rating += 25;
+  else rating -= 15;
 
-  }, 2000 + Math.random() * 2000);
+  if (rating < 100) rating = 100;
+
+  document.getElementById("rating").innerText = rating;
+
+  document.getElementById("matchText").innerHTML =
+    "You Aura: " + youAura +
+    "<br>Opponent Aura: " + oppAura +
+    "<br><br>" + (win ? "YOU WON" : "YOU LOST");
 }
 </script>
 
