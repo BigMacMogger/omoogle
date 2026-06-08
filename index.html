@@ -22,19 +22,20 @@
     .title {
       font-size: 30px;
       font-weight: 900;
-      margin-top: 10px;
     }
 
-    .card {
-      margin-top: 15px;
+    video {
+      width: 100%;
+      border-radius: 14px;
+      margin-top: 10px;
+      transform: scaleX(-1);
+    }
+
+    .box {
+      margin-top: 20px;
       padding: 15px;
       border-radius: 14px;
       background: rgba(255,255,255,0.05);
-    }
-
-    .rating {
-      font-size: 42px;
-      font-weight: 900;
     }
 
     button {
@@ -48,90 +49,45 @@
       color: black;
     }
 
-    .login {
-      background: #4285F4;
-      color: white;
-    }
-
-    .small {
-      color: #aaa;
-      font-size: 13px;
-    }
-
-    /* ================= RANK BAR ================= */
-
-    .rankBox {
-      margin-top: 15px;
-      overflow: hidden;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.05);
-      padding: 10px;
-    }
-
-    .rankTrack {
-      display: flex;
-      gap: 10px;
-      animation: scroll 10s linear infinite;
-      width: max-content;
+    #game {
+      display: none;
     }
 
     .rank {
-      padding: 8px 14px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.08);
-      font-weight: 700;
-      white-space: nowrap;
+      margin-top: 10px;
+      color: #aaa;
     }
-
-    @keyframes scroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
   </style>
 </head>
 
 <body>
 
-<div class="container">
+<!-- ================= FACE CHECK SCREEN ================= -->
+<div class="container" id="faceScreen">
+
+  <div class="title">OMOOGLE FACE CHECK</div>
+
+  <div class="box">
+    <div>Look at camera</div>
+    <video id="video" autoplay playsinline></video>
+  </div>
+
+  <button onclick="enterGame()">ENTER GAME</button>
+
+</div>
+
+<!-- ================= GAME SCREEN ================= -->
+<div class="container" id="game">
 
   <div class="title">OMOOGLE</div>
 
-  <div id="loginBox">
-    <button class="login" onclick="login()">SIGN IN WITH GOOGLE</button>
+  <div class="box">
+    <div>Your ELO</div>
+    <div id="elo" style="font-size:40px;font-weight:900;">1000</div>
+    <div class="rank" id="rank">Fed</div>
   </div>
 
-  <div id="game" style="display:none;">
-
-    <div class="small" id="userInfo"></div>
-
-    <div class="card">
-      <div>Your ELO</div>
-      <div class="rating" id="elo">1000</div>
-      <div id="stats">Wins: 0 | Losses: 0</div>
-    </div>
-
-    <!-- 🔥 ANIMATED RANK BAR -->
-    <div class="rankBox">
-      <div class="rankTrack">
-        <div class="rank">🧼 Fed (0–999)</div>
-        <div class="rank">😐 Discord Mod (1000–1199)</div>
-        <div class="rank">🧍 NPC (1200–1399)</div>
-        <div class="rank">🏋️ Gym Bro (1400–1599)</div>
-        <div class="rank">📈 Looksmaxxer (1600–1799)</div>
-        <div class="rank">😎 Mogger (1800–1999)</div>
-        <div class="rank">🔥 Gigachad (2000–2199)</div>
-        <div class="rank">⚡ Aura Farmer (2200+)</div>
-
-        <!-- duplicate for smooth loop -->
-        <div class="rank">🧼 Fed (0–999)</div>
-        <div class="rank">😐 Discord Mod (1000–1199)</div>
-      </div>
-    </div>
-
-    <button onclick="findMatch()">FIND MATCH</button>
-
-  </div>
+  <button onclick="findMatch()">FIND MATCH</button>
 
 </div>
 
@@ -152,81 +108,63 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
 const db = firebase.database();
 
-let user = null;
+let stream = null;
 let elo = 1000;
-let wins = 0;
-let losses = 0;
 
-/* LOGIN */
-function login() {
-  let provider = new firebase.auth.GoogleAuthProvider();
+/* ================= CAMERA START ================= */
+async function startCamera() {
+  let video = document.getElementById("video");
 
-  auth.signInWithPopup(provider).then(res => {
-    user = res.user;
-
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("game").style.display = "block";
-
-    document.getElementById("userInfo").innerText =
-      "Logged in as: " + user.displayName;
-
-    loadData();
+  stream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: false
   });
+
+  video.srcObject = stream;
 }
 
-/* LOAD */
-function loadData() {
-  db.ref("users/" + user.uid).on("value", snap => {
-    let d = snap.val();
+/* start instantly */
+startCamera();
 
-    if (d) {
-      elo = d.elo || 1000;
-      wins = d.wins || 0;
-      losses = d.losses || 0;
-    }
-
-    updateUI();
-  });
+/* ================= ENTER GAME ================= */
+function enterGame() {
+  document.getElementById("faceScreen").style.display = "none";
+  document.getElementById("game").style.display = "block";
 }
 
-/* SAVE */
-function saveData() {
-  db.ref("users/" + user.uid).set({
-    elo, wins, losses,
-    name: user.displayName
-  });
+/* ================= RANK SYSTEM ================= */
+function updateRank() {
+  let rank = "";
+
+  if (elo < 1000) rank = "🧼 Fed";
+  else if (elo < 1200) rank = "😐 Discord Mod";
+  else if (elo < 1400) rank = "🧍 NPC";
+  else if (elo < 1600) rank = "🏋️ Gym Bro";
+  else if (elo < 1800) rank = "📈 Looksmaxxer";
+  else if (elo < 2000) rank = "😎 Mogger";
+  else rank = "🔥 Gigachad";
+
+  document.getElementById("rank").innerText = rank;
 }
 
-/* UI */
-function updateUI() {
-  document.getElementById("elo").innerText = elo;
-  document.getElementById("stats").innerText =
-    "Wins: " + wins + " | Losses: " + losses;
-}
-
-/* MATCH */
+/* ================= MATCH ================= */
 function findMatch() {
 
   let win = Math.random() > 0.5;
 
-  if (win) {
-    elo += 25;
-    wins++;
-  } else {
-    elo -= 15;
-    losses++;
-  }
-
+  elo += win ? 25 : -15;
   if (elo < 100) elo = 100;
 
-  saveData();
-  updateUI();
+  document.getElementById("elo").innerText = elo;
+
+  updateRank();
 
   alert(win ? "YOU WON" : "YOU LOST");
 }
+
+updateRank();
 </script>
 
 </body>
