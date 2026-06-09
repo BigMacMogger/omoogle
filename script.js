@@ -13,6 +13,7 @@ const usernameStatus = document.getElementById("usernameStatus");
 const profileUsername = document.getElementById("profileUsername");
 const profileRank = document.getElementById("profileRank");
 const profileElo = document.getElementById("profileElo");
+const signOutBtn = document.getElementById("signOutBtn");
 
 let currentUser = null;
 
