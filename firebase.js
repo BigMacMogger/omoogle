@@ -1,14 +1,16 @@
-const firebaseConfig = {
-  apiKey: "AIzaSyDgJSJYCqQXzDhs7_VOWz13sobzoYNL7ao",
-  authDomain: "omoogle-d0faa.firebaseapp.com",
-  projectId: "omoogle-d0faa",
-  storageBucket: "omoogle-d0faa.appspot.com",
-  messagingSenderId: "291641969937",
-  appId: "1:291641969937:web:b01f5c40857a3980da90b0",
-  databaseURL: "https://omoogle-d0faa-default-rtdb.firebaseio.com"
-};
+alert("SCRIPT STARTED");
 
-firebase.initializeApp(firebaseConfig);
+const provider = new firebase.auth.GoogleAuthProvider();
 
-const auth = firebase.auth();
-const db = firebase.database();
+document.getElementById("googleLoginBtn").addEventListener("click", () => {
+  alert("BUTTON CLICKED");
+
+  auth.signInWithPopup(provider)
+    .then((result) => {
+      alert("LOGGED IN: " + result.user.email);
+    })
+    .catch((error) => {
+      alert("ERROR: " + error.message);
+      console.error(error);
+    });
+});
