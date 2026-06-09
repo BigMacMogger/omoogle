@@ -1,16 +1,19 @@
-alert("SCRIPT STARTED");
-
 const provider = new firebase.auth.GoogleAuthProvider();
 
-document.getElementById("googleLoginBtn").addEventListener("click", () => {
-  alert("BUTTON CLICKED");
+document.getElementById("googleLoginBtn").addEventListener("click", async () => {
 
-  auth.signInWithPopup(provider)
-    .then((result) => {
-      alert("LOGGED IN: " + result.user.email);
-    })
-    .catch((error) => {
-      alert("ERROR: " + error.message);
-      console.error(error);
-    });
+  try {
+
+    const result = await auth.signInWithPopup(provider);
+
+    alert("SUCCESS: " + result.user.email);
+
+  } catch (error) {
+
+    alert("ERROR: " + error.message);
+
+    console.error(error);
+
+  }
+
 });
