@@ -120,13 +120,28 @@ createUsernameBtn.addEventListener("click", async () => {
 
 });
 
-// Existing Login Session
-auth.onAuthStateChanged(async (user) => {
+// SIGN OUT
 
-  if (!user) return;
+signOutBtn.addEventListener("click", async () => {
 
-  currentUser = user;
+  const confirmed = confirm(
+    "Are you sure you want to sign out?"
+  );
 
-  loadUser();
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+
+    await auth.signOut();
+
+    location.reload();
+
+  } catch (error) {
+
+    alert(error.message);
+
+  }
 
 });
